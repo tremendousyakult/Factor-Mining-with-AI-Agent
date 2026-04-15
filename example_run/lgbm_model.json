@@ -1,0 +1,10 @@
+{
+  "feature_names": [
+    "f_0002",
+    "f_0004"
+  ],
+  "feature_importances": [
+    60,
+    72
+  ]
+}

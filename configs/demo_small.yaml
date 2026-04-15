@@ -1,0 +1,46 @@
+data:
+  date_col: date
+  asset_col: asset
+  return_col: ret
+  price_col: close
+  volume_col: volume
+  market_return_col: market_ret
+  spread_col: spread
+  exchange_col: exchange
+  share_code_col: share_code
+  eligible_exchanges: [NYSE, NASDAQ, AMEX]
+  common_share_codes: [10, 11]
+  min_price: 5.0
+  min_history_days: 120
+split:
+  is_end: '2020-12-31'
+  oos_start: '2021-01-01'
+preprocessing:
+  target_winsor_lower: 0.01
+  target_winsor_upper: 0.99
+  factor_winsor_lower: 0.01
+  factor_winsor_upper: 0.99
+evaluation:
+  tau_sig: 2.5
+  tau_econ: 0.5
+  tau_fail: 0.75
+  require_positive_monotonicity: true
+agent:
+  mode: agentic
+  seed: 42
+  rounds: 4
+  candidates_per_round: 16
+aggregation:
+  lgbm:
+    n_estimators: 150
+    learning_rate: 0.05
+    num_leaves: 15
+    max_depth: 3
+    min_child_samples: 20
+    subsample: 0.8
+    colsample_bytree: 0.8
+    reg_alpha: 0.0
+    reg_lambda: 1.0
+costs:
+  one_way_bps: 3.0
+benchmarks: {}

@@ -1,0 +1,43 @@
+{
+  "discovery_mode": "agentic",
+  "n_promoted": 2,
+  "promoted_factor_ids": [
+    "f_0002",
+    "f_0004"
+  ],
+  "linear_summary": {
+    "gross": {
+      "period_return": 0.9757362437845896,
+      "ann_return": 0.39096053128059305,
+      "ann_sharpe": 1.494919645870709,
+      "max_dd": -0.166933362348068,
+      "n_days": 520
+    },
+    "net": {
+      "period_return": 0.606677949792352,
+      "ann_return": 0.25833501258644875,
+      "ann_sharpe": 1.076234338521224,
+      "max_dd": -0.17396284964153608,
+      "n_days": 520
+    },
+    "avg_turnover": 1.3259615384615384
+  },
+  "lgbm_summary": {
+    "gross": {
+      "period_return": 1.3910107914844438,
+      "ann_return": 0.5256904816368577,
+      "ann_sharpe": 1.9277208021661734,
+      "max_dd": -0.13479335679953175,
+      "n_days": 520
+    },
+    "net": {
+      "period_return": 0.8961059423968325,
+      "ann_return": 0.36350423264133136,
+      "ann_sharpe": 1.4453360141978695,
+      "max_dd": -0.14824404389737778,
+      "n_days": 520
+    },
+    "avg_turnover": 1.4884615384615385
+  },
+  "benchmark_alpha_rows": 0
+}
