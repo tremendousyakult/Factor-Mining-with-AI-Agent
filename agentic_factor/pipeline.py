@@ -36,6 +36,8 @@ class AgenticFactorPipeline:
             promoted, evals_is, logs = self._run_agentic_loop(panel_is); write_jsonl(logs, out_dir / "round_logs.jsonl")
         self._write_factor_evaluations(evals_is, out_dir / "factor_metrics_is.csv")
         promoted = [ev.recipe for ev in evals_is if ev.decision == "promote"] if discovery_mode == "agentic" else promoted
+        if discovery_mode == "agentic" and promoted:
+            promoted = self._dedupe_promoted_by_correlation(evals_is, promoted)
         if not promoted:
             raise RuntimeError("No factors were promoted. Lower the gate thresholds or use the paper_seed mode.")
         promoted_is = evaluate_library(promoted, panel_is, self.config)
@@ -73,6 +75,27 @@ class AgenticFactorPipeline:
         final_recipes = list(promoted.values())
         final_evals = evaluate_library(final_recipes, panel_is, self.config) if final_recipes else last_evals
         return final_recipes, final_evals, logs
+
+    def _dedupe_promoted_by_correlation(self, evals_is: list[FactorEvaluation], promoted: list[FactorRecipe]) -> list[FactorRecipe]:
+        cfg = self.config.get("agent", {})
+        corr_threshold = float(cfg.get("max_corr", 0.95))
+        corr_method = str(cfg.get("corr_method", "spearman"))
+        promoted_ids = {r.factor_id for r in promoted}
+        promoted_evals = [ev for ev in evals_is if ev.recipe.factor_id in promoted_ids]
+        promoted_evals = sorted(promoted_evals, key=lambda ev: abs(float(ev.metrics.get("t_ic", float("nan")))), reverse=True)
+        selected: list[FactorEvaluation] = []
+        for ev in promoted_evals:
+            keep = True
+            for chosen in selected:
+                corr = ev.score.corr(chosen.score, method=corr_method)
+                if pd.notna(corr) and abs(float(corr)) >= corr_threshold:
+                    keep = False
+                    break
+            if keep:
+                selected.append(ev)
+        if not selected and promoted_evals:
+            selected = [promoted_evals[0]]
+        return [ev.recipe for ev in selected]
 
     @staticmethod
     def _write_factor_evaluations(evals: list[FactorEvaluation], path: Path) -> None:

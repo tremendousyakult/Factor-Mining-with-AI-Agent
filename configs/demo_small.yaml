@@ -24,12 +24,17 @@ evaluation:
   tau_sig: 2.5
   tau_econ: 0.5
   tau_fail: 0.75
+  min_coverage_days: 120
+  min_assets_ic: 8
+  min_assets_spread: 10
   require_positive_monotonicity: true
 agent:
   mode: agentic
   seed: 42
   rounds: 4
   candidates_per_round: 16
+  max_corr: 0.95
+  corr_method: spearman
 aggregation:
   lgbm:
     n_estimators: 150
