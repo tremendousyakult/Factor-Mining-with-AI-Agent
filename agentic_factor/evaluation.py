@@ -49,16 +49,18 @@ class FactorEvaluator:
 
     def _daily_rank_ic(self, score: pd.Series) -> pd.Series:
         joined = pd.DataFrame({"score": score, "ret_fwd_1": self.panel["ret_fwd_1"]}).dropna()
+        min_assets_ic = int(self.config["evaluation"].get("min_assets_ic", 8))
         def _corr(g: pd.DataFrame) -> float:
-            if g.shape[0] < 8:
+            if g.shape[0] < min_assets_ic:
                 return np.nan
             return g["score"].corr(g["ret_fwd_1"], method="spearman")
         return joined.groupby(level="date", sort=False).apply(_corr)
 
     def _half_split_returns(self, score: pd.Series) -> pd.Series:
         joined = pd.DataFrame({"score": score, "ret_fwd_1": self.panel["ret_fwd_1"]}).dropna()
+        min_assets_spread = int(self.config["evaluation"].get("min_assets_spread", 10))
         def _spread(g: pd.DataFrame) -> float:
-            if g.shape[0] < 10:
+            if g.shape[0] < min_assets_spread:
                 return np.nan
             rank_pct = g["score"].rank(pct=True, method="first")
             long_ret = g.loc[rank_pct > 0.5, "ret_fwd_1"].mean()
@@ -96,8 +98,12 @@ class FactorEvaluator:
     def _gate(self, metrics: dict[str, Any]) -> str:
         ev = self.config["evaluation"]
         tau_sig = float(ev.get("tau_sig", 3.0)); tau_econ = float(ev.get("tau_econ", 1.0)); tau_fail = float(ev.get("tau_fail", 1.0))
+        min_coverage_days = int(ev.get("min_coverage_days", 252))
         require_monotonicity = bool(ev.get("require_positive_monotonicity", True))
         t_ic = abs(float(metrics.get("t_ic", np.nan))); sharpe = float(metrics.get("sharpe", np.nan)); mono = float(metrics.get("monotonicity", np.nan))
+        coverage_days = int(metrics.get("coverage_days", 0))
+        if coverage_days < min_coverage_days:
+            return "retire"
         mono_ok = (not require_monotonicity) or (np.isnan(mono) or mono > 0)
         if t_ic >= tau_sig and sharpe >= tau_econ and mono_ok:
             return "promote"
